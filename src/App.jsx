@@ -1,10 +1,10 @@
 import { useState } from "react";
 import "./App.css";
 
-import Login from "./components/Login";
-import Register from "./components/Register";
-import ForgotPassword from "./components/ForgotPassword";
-import Dashboard from "./components/Dashboard";
+import Login from "./Components/Login";
+import Register from "./Components/Register";
+import ForgotPassword from "./Components/ForgotPassword";
+import Dashboard from "./Components/Dashboard";
 import { logout } from "./api/authApi";
 
 function getSavedUser() {
