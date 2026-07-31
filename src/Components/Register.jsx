@@ -62,7 +62,7 @@ function Register({ switchToLogin, setToken, setUser }) {
       } else {
         const data = await sendMobileOtp(name, mobile);
         setOtpSent(true);
-        setMessage(data.message || "OTP sent to your mobile. Check backend console.");
+        setMessage(data.message || "OTP sent to your mobile.");
       }
     } catch (err) {
       setError(err.message || "Registration failed.");
