@@ -17,7 +17,7 @@ const getAuthHeaders = () => {
 };
 
 export const getNotes = async () => {
-  const res = await axios.get(`${API}/notes`, {
+  const res = await axios.get(`${API_URL}/notes`, {
     headers: getAuthHeaders(),
   });
 
@@ -26,7 +26,7 @@ export const getNotes = async () => {
 
 export const createTextNote = async (text, folderId, folderName) => {
   const res = await axios.post(
-    `${API}/notes/text`,
+    `${API_URL}/notes/text`,
     {
       text,
       folder_id: folderId,
@@ -41,7 +41,7 @@ export const createTextNote = async (text, folderId, folderName) => {
 };
 
 export const deleteNoteById = async (id) => {
-  const res = await axios.delete(`${API}/notes/${id}`, {
+  const res = await axios.delete(`${API_URL}/notes/${id}`, {
     headers: getAuthHeaders(),
   });
 
@@ -50,7 +50,7 @@ export const deleteNoteById = async (id) => {
 
 export const updateNoteById = async (id, text, folderId, folderName) => {
   const res = await axios.put(
-    `${API}/notes/${id}`,
+    `${API_URL}/notes/${id}`,
     {
       text,
       folder_id: folderId,
@@ -66,7 +66,7 @@ export const updateNoteById = async (id, text, folderId, folderName) => {
 
 export const semanticSearchNotes = async (query) => {
   const res = await axios.post(
-    `${API}/notes/search`,
+    `${API_URL}/notes/search`,
     { query },
     {
       headers: getAuthHeaders(),
@@ -80,7 +80,7 @@ export const createAudioNote = async (audioBlob) => {
   const formData = new FormData();
   formData.append("file", audioBlob, "note.webm");
 
-  const res = await axios.post(`${API}/notes/audio`, formData, {
+  const res = await axios.post(`${API_URL}/notes/audio`, formData, {
     headers: {
       ...getAuthHeaders(),
       "Content-Type": "multipart/form-data",
