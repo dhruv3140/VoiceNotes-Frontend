@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createAudioNote } from "../api/notesApi";
+import { createAudioNote } from "../api/notesapi";
 
 function useVoiceRecorder({ fetchNotes, startLoading, stopLoading, setError }) {
   const [isRecording, setIsRecording] = useState(false);
