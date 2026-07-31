@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Automatically switches between your Render backend and local backend
-const API = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
