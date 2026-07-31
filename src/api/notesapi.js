@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API = "http://127.0.0.1:8000";
+// Automatically switches between your Render backend and local backend
+const API = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
@@ -87,4 +88,3 @@ export const createAudioNote = async (audioBlob) => {
 
   return res.data;
 };
-
