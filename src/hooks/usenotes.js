@@ -5,7 +5,7 @@ import {
   deleteNoteById,
   updateNoteById,
   semanticSearchNotes,
-} from "../api/notesApi";
+} from "../api/notesapi";
 import jspdf from "jspdf"
 
 function useNotes() {
