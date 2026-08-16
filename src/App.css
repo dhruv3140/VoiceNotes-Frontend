@@ -3,7 +3,7 @@
 }
 
 
-:root {
+  :root {
   --bg-1: #090e11;
   --bg-2: #022c22;
   --bg-3: #064e3b;
@@ -25,6 +25,7 @@
 
   --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
+
 
 body {
   margin: 0;
@@ -109,6 +110,7 @@ body::after {
   letter-spacing: -0.5px;
 }
 
+/* Glass cards */
 /* Glass cards */
 .card,
 .note-card {
@@ -532,26 +534,19 @@ button[style*="crimson"] {
   }
 }
 
+
 .auth-card {
   position: relative;
   z-index: 10;
   width: 100%;
   max-width: 430px;
-  padding: 40px 34px;
-  border-radius: 28px;
-  background: linear-gradient(
-    135deg,
-    rgba(15, 23, 42, 0.78) 0%,
-    rgba(9, 9, 11, 0.88) 100%
-  );
-  border: 1px solid rgba(16, 185, 129, 0.22);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 
-    0 25px 70px rgba(0, 0, 0, 0.55),
-    0 0 40px rgba(16, 185, 129, 0.06);
+  padding: 28px 28px;
+  border-radius: 12px;
+  background: #0f1724;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   text-align: center;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s ease;
 }
 
 .auth-card:hover {

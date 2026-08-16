@@ -145,23 +145,23 @@ function Login({
 
             <form onSubmit={handlePasswordLogin}>
               <input
-                type="text"
-                placeholder="Enter email"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                disabled={loading}
-              />
+                              type="text"
+                              placeholder="Enter email"
+                              value={identifier}
+                              onChange={(e) => setIdentifier(e.target.value)}
+                              disabled={loading}
+                            />
 
               <div className="password-input-wrapper">
                 <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter password"
-                  value={password}
-                  minLength={6}
-                  maxLength={72}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                />
+                                  type={showPassword ? "text" : "password"}
+                                  placeholder="Enter password"
+                                  value={password}
+                                  minLength={6}
+                                  maxLength={72}
+                                  onChange={(e) => setPassword(e.target.value)}
+                                  disabled={loading}
+                                />
                 <button
                   type="button"
                   className="password-eye-btn"
@@ -177,11 +177,11 @@ function Login({
             </form>
 
             <p className="auth-switch">
-              <span onClick={switchToForgotPassword}>Forgot Password?</span>
+                          <span onClick={switchToForgotPassword}>Forgot Password?</span>
             </p>
 
             <p className="auth-switch">
-              <span onClick={switchToOtpLogin}>Login with OTP</span>
+                          <span onClick={switchToOtpLogin}>Login with OTP</span>
             </p>
           </>
         )}
@@ -193,12 +193,12 @@ function Login({
             {!otpSent ? (
               <form onSubmit={handleSendOtp}>
                 <input
-                  type="text"
-                  placeholder="Enter email or mobile number"
-                  value={otpIdentifier}
-                  onChange={(e) => setOtpIdentifier(e.target.value)}
-                  disabled={loading}
-                />
+                                  type="text"
+                                  placeholder="Enter email or mobile number"
+                                  value={otpIdentifier}
+                                  onChange={(e) => setOtpIdentifier(e.target.value)}
+                                  disabled={loading}
+                                />
 
                 <button type="submit" disabled={loading}>
                   {loading ? "Sending OTP..." : "Send OTP"}
@@ -207,12 +207,12 @@ function Login({
             ) : (
               <form onSubmit={handleVerifyOtp}>
                 <input
-                  type="text"
-                  placeholder="Enter OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  disabled={loading}
-                />
+                                  type="text"
+                                  placeholder="Enter OTP"
+                                  value={otp}
+                                  onChange={(e) => setOtp(e.target.value)}
+                                  disabled={loading}
+                                />
 
                 <button type="submit" disabled={loading}>
                   {loading ? "Verifying..." : "Verify OTP & Login"}
@@ -243,7 +243,7 @@ function Login({
 
         <p className="auth-switch">
           Don&apos;t have an account?{" "}
-          <span onClick={switchToRegister}>Register</span>
+                  <span onClick={switchToRegister}>Register</span>
         </p>
       </div>
     </div>
