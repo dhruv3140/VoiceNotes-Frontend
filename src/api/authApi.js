@@ -1,8 +1,6 @@
-//const API_URL = import.meta.env.VITE_API_URL||"http://127.0.0.1:8000/auth";
-// Local ke liye http://localhost:8000 use karein, Vite ka port 5173 nahi!
+
 const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-// Ensure karein ki extra slash na bane
 const API_URL = `${BASE_URL.replace(/\/+$/, "")}/auth`;
 export const login = async (email, password) => {
   const response = await fetch(`${API_URL}/login`, {
