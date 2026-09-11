@@ -145,10 +145,6 @@ body::after {
   transition: 0.7s; */
 }
 
-/* .card:hover::before,
-.note-card:hover::before {
-  /* transform: translateX(100%); */
-} */
 
 .card:hover,
 .note-card:hover {
