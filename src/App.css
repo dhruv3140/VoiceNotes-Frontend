@@ -141,18 +141,18 @@ body::after {
     rgba(255, 255, 255, 0.14),
     transparent
   );
-  transform: translateX(-100%);
-  transition: 0.7s;
+  /* transform: translateX(-100%);
+  transition: 0.7s; */
 }
 
-.card:hover::before,
+/* .card:hover::before,
 .note-card:hover::before {
-  transform: translateX(100%);
-}
+  /* transform: translateX(100%); */
+} */
 
 .card:hover,
 .note-card:hover {
-  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.16);
   border-color: rgba(255, 255, 255, 0.42);
   box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
 }

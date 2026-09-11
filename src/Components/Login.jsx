@@ -12,8 +12,7 @@ function Login({
   switchToRegister,
   switchToForgotPassword,
 }) {
-  const [loginMode, setLoginMode] = useState("password"); 
-  // password | otp
+  const [loginMode, setLoginMode] = useState("password");
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +20,6 @@ function Login({
   const [otpIdentifier, setOtpIdentifier] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -134,38 +132,47 @@ function Login({
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h2>Login</h2>
+        <div className="auth-header">
+          <h2>Welcome back</h2>
+          <p className="auth-subtitle">
+            {loginMode === "password"
+              ? "Login to continue to Smart Notes"
+              : "Login securely using a one-time password"}
+          </p>
+        </div>
 
         {error && <p className="auth-error">{error}</p>}
         {message && <p className="auth-success">{message}</p>}
 
-        {loginMode === "password" && (
+        {loginMode === "password" ? (
           <>
-            <p className="auth-subtitle">Login with email and password</p>
-
             <form onSubmit={handlePasswordLogin}>
               <input
-                              type="text"
-                              placeholder="Enter email"
-                              value={identifier}
-                              onChange={(e) => setIdentifier(e.target.value)}
-                              disabled={loading}
-                            />
+                type="email"
+                placeholder="Enter your email"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                disabled={loading}
+                autoComplete="email"
+              />
 
               <div className="password-input-wrapper">
                 <input
-                                  type={showPassword ? "text" : "password"}
-                                  placeholder="Enter password"
-                                  value={password}
-                                  minLength={6}
-                                  maxLength={72}
-                                  onChange={(e) => setPassword(e.target.value)}
-                                  disabled={loading}
-                                />
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  minLength={6}
+                  maxLength={72}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  autoComplete="current-password"
+                />
+
                 <button
                   type="button"
                   className="password-eye-btn"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? "🙈" : "👁️"}
                 </button>
@@ -176,29 +183,36 @@ function Login({
               </button>
             </form>
 
-            <p className="auth-switch">
-                          <span onClick={switchToForgotPassword}>Forgot Password?</span>
-            </p>
+            <div className="auth-links">
+              <button
+                type="button"
+                className="auth-link-btn"
+                onClick={switchToForgotPassword}
+              >
+                Forgot Password?
+              </button>
 
-            <p className="auth-switch">
-                          <span onClick={switchToOtpLogin}>Login with OTP</span>
-            </p>
+              <button
+                type="button"
+                className="auth-link-btn"
+                onClick={switchToOtpLogin}
+              >
+                Login with OTP
+              </button>
+            </div>
           </>
-        )}
-
-        {loginMode === "otp" && (
+        ) : (
           <>
-            <p className="auth-subtitle">Login with OTP</p>
-
             {!otpSent ? (
               <form onSubmit={handleSendOtp}>
                 <input
-                                  type="text"
-                                  placeholder="Enter email or mobile number"
-                                  value={otpIdentifier}
-                                  onChange={(e) => setOtpIdentifier(e.target.value)}
-                                  disabled={loading}
-                                />
+                  type="text"
+                  placeholder="Enter email or mobile number"
+                  value={otpIdentifier}
+                  onChange={(e) => setOtpIdentifier(e.target.value)}
+                  disabled={loading}
+                  autoComplete="username"
+                />
 
                 <button type="submit" disabled={loading}>
                   {loading ? "Sending OTP..." : "Send OTP"}
@@ -207,12 +221,13 @@ function Login({
             ) : (
               <form onSubmit={handleVerifyOtp}>
                 <input
-                                  type="text"
-                                  placeholder="Enter OTP"
-                                  value={otp}
-                                  onChange={(e) => setOtp(e.target.value)}
-                                  disabled={loading}
-                                />
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  disabled={loading}
+                  autoComplete="one-time-code"
+                />
 
                 <button type="submit" disabled={loading}>
                   {loading ? "Verifying..." : "Verify OTP & Login"}
@@ -229,9 +244,15 @@ function Login({
               </form>
             )}
 
-            <p className="auth-switch">
-              <span onClick={switchToPasswordLogin}>Login with Password</span>
-            </p>
+            <div className="auth-links">
+              <button
+                type="button"
+                className="auth-link-btn"
+                onClick={switchToPasswordLogin}
+              >
+                Login with Password
+              </button>
+            </div>
           </>
         )}
 
@@ -242,8 +263,10 @@ function Login({
         </div>
 
         <p className="auth-switch">
-          Don&apos;t have an account?{" "}
-                  <span onClick={switchToRegister}>Register</span>
+          Don't have an account?{" "}
+          <button type="button" onClick={switchToRegister}>
+            Register
+          </button>
         </p>
       </div>
     </div>
