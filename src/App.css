@@ -141,8 +141,8 @@ body::after {
     rgba(255, 255, 255, 0.14),
     transparent
   );
-  /* transform: translateX(-100%);
-  transition: 0.7s; */
+  transform: translateX(-100%);
+  transition: 0.7s;
 }
 
 
