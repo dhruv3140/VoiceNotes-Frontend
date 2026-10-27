@@ -6,7 +6,14 @@ import {
   updateNoteById,
   semanticSearchNotes,
 } from "../api/notesapi";
-import jspdf from "jspdf"
+import jspdf from "jspdf";
+import { Capacitor } from "@capacitor/core";
+import {
+  Directory,
+  Encoding,
+  Filesystem,
+} from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 
 function useNotes() {
   const [notes, setNotes] = useState([]);
@@ -26,17 +33,6 @@ function useNotes() {
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [allNotes, setAllNotes] = useState([]);
 
-  const filterByTag = (tag) => {
-  setSelectedTag(tag);
-
-  const filtered = notes.filter((note) => {
-    const tags = note.metadata?.tags || [];
-    return tags.includes(tag);
-  });
-
-  setNotes(filtered);
-};
-
   const startLoading = (message) => {
     setLoading(true);
     setLoadingMessage(message);
@@ -48,175 +44,247 @@ function useNotes() {
     setLoadingMessage("");
   };
 
-  const toggleSelectNote = (id) => {
-  setSelectedNoteIds((prev) => {
-    if (prev.includes(id)) {
-      return prev.filter((noteId) => noteId !== id);
+  const applyFolderFilter = (data, folder) => {
+    if (!folder) {
+      setNotes(data);
+      return;
     }
 
-    return [...prev, id];
-  });
-};
+    const filtered = data.filter(
+      (note) =>
+        Number(note.metadata?.folder_id) === Number(folder.id)
+    );
+
+    setNotes(filtered);
+  };
+
+  const fetchNotes = async () => {
+    try {
+      startLoading("Fetching notes...");
+      const data = await getNotes();
+
+      setAllNotes(data);
+      applyFolderFilter(data, selectedFolder);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch notes.");
+    } finally {
+      stopLoading();
+    }
+  };
+
+  const filterByTag = (tag) => {
+    setSelectedTag(tag);
+
+    const filtered = notes.filter((note) => {
+      const tags = note.metadata?.tags || [];
+      return tags.includes(tag);
+    });
+
+    setNotes(filtered);
+  };
+
+  const toggleSelectNote = (id) => {
+    setSelectedNoteIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((noteId) => noteId !== id);
+      }
+
+      return [...prev, id];
+    });
+  };
 
   const deleteSelectedNotes = async () => {
-  if (selectedNoteIds.length === 0) return;
+    if (selectedNoteIds.length === 0) return;
 
-  const confirmDelete = confirm(
-    `Are you sure you want to delete ${selectedNoteIds.length} notes?`
-  );
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${selectedNoteIds.length} notes?`
+    );
 
-  if (!confirmDelete) return;
+    if (!confirmDelete) return;
 
-  try {
-    startLoading("Deleting selected notes...");
+    try {
+      startLoading("Deleting selected notes...");
 
-    for (const id of selectedNoteIds) {
-      await deleteNoteById(id);
+      for (const id of selectedNoteIds) {
+        await deleteNoteById(id);
+      }
+
+      setSelectedNoteIds([]);
+      await fetchNotes();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to delete selected notes.");
+    } finally {
+      stopLoading();
+    }
+  };
+
+  const filterNotesByFolder = (folder) => {
+    setSelectedFolder(folder);
+    applyFolderFilter(allNotes, folder);
+  };
+
+  const getNotesToExport = () => {
+    return selectedNoteIds.length > 0
+      ? notes.filter((note) => selectedNoteIds.includes(note.id))
+      : notes;
+  };
+
+  const exportNotesAsTxt = async () => {
+    const notesToExport = getNotesToExport();
+
+    if (!notesToExport.length) {
+      alert("No notes to export");
+      return;
     }
 
-    setSelectedNoteIds([]);
-    await fetchNotes();
-  } catch (err) {
-    console.error(err);
-    setError("Failed to delete selected notes.");
-  } finally {
-    stopLoading();
-  }
-};
+    const content = notesToExport
+      .map((note, index) => {
+        const transcript = note.metadata?.transcript || "";
+        const tags = note.metadata?.tags?.join(", ") || "No tags";
+        const folder = note.metadata?.folder_name || "General";
+        const createdAt = note.metadata?.created_at
+          ? new Date(note.metadata.created_at).toLocaleString()
+          : "Old note";
 
-const getNotesToExport = () => {
-  return selectedNoteIds.length > 0
-    ? notes.filter((note) => selectedNoteIds.includes(note.id))
-    : notes;
-};
-
-const exportNotesAsTxt = () => {
-  const notesToExport = getNotesToExport();
-
-  if (notesToExport.length === 0) {
-    alert("No notes to export");
-    return;
-  }
-
-  const content = notesToExport
-    .map((note, index) => {
-      const text = note.metadata?.transcript || "";
-      const tags = note.metadata?.tags?.join(", ") || "No tags";
-      const folder = note.metadata?.folder_name || "General";
-      const createdAt = note.metadata?.created_at
-        ? new Date(note.metadata.created_at).toLocaleString()
-        : "Old note";
-
-      return `Note ${index + 1}
+        return `Note ${index + 1}
 Folder: ${folder}
 Created At: ${createdAt}
 Tags: ${tags}
 
-${text}
+${transcript}
 
 ------------------------------
 `;
-    })
-    .join("\n");
+      })
+      .join("\n");
 
-  const blob = new Blob([content], {
-    type: "text/plain;charset=utf-8",
-  });
+    try {
+      const filename = "voicenotes-export.txt";
 
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+      if (Capacitor.isNativePlatform()) {
+        await Filesystem.writeFile({
+          path: filename,
+          data: content,
+          directory: Directory.Cache,
+          encoding: Encoding.UTF8,
+        });
 
-  link.href = url;
-  link.download = "smart-notes-export.txt";
-  link.click();
+        const file = await Filesystem.getUri({
+          path: filename,
+          directory: Directory.Cache,
+        });
 
-  URL.revokeObjectURL(url);
-};
+        await Share.share({
+          title: "Export notes as TXT",
+          files: [file.uri],
+          dialogTitle: "Save or share your notes",
+        });
+      } else {
+        const blob = new Blob([content], {
+          type: "text/plain;charset=utf-8",
+        });
 
-const exportNotesAsPdf = () => {
-  const notesToExport = getNotesToExport();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
 
-  if (notesToExport.length === 0) {
-    alert("No notes to export");
-    return;
-  }
+        link.href = url;
+        link.download = filename;
+        link.click();
 
-  const pdf = new jspdf();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+    } catch (err) {
+      console.error("TXT export failed:", err);
+      alert(`TXT export failed: ${err.message}`);
+    }
+  };
 
-  let y = 20;
-  const margin = 14;
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
+  const exportNotesAsPdf = async () => {
+    const notesToExport = getNotesToExport();
 
-  pdf.setFontSize(18);
-  pdf.text("Smart Notes Export", margin, y);
-  y += 15;
+    if (!notesToExport.length) {
+      alert("No notes to export");
+      return;
+    }
 
-  notesToExport.forEach((note, index) => {
-    const text = note.metadata?.transcript || "";
-    const tags = note.metadata?.tags?.join(", ") || "No tags";
-    const folder = note.metadata?.folder_name || "General";
-    const createdAt = note.metadata?.created_at
-      ? new Date(note.metadata.created_at).toLocaleString()
-      : "Old note";
+    try {
+      const pdf = new jspdf();
+      const margin = 14;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
 
-    const noteContent = `Note ${index + 1}
+      let y = 20;
+
+      pdf.setFontSize(18);
+      pdf.text("VoiceNotes Export", margin, y);
+      y += 15;
+
+      notesToExport.forEach((note, index) => {
+        const transcript = note.metadata?.transcript || "";
+        const tags = note.metadata?.tags?.join(", ") || "No tags";
+        const folder = note.metadata?.folder_name || "General";
+        const createdAt = note.metadata?.created_at
+          ? new Date(note.metadata.created_at).toLocaleString()
+          : "Old note";
+
+        const noteContent = `Note ${index + 1}
 Folder: ${folder}
 Created At: ${createdAt}
 Tags: ${tags}
 
-${text}
-`;
+${transcript}`;
 
-    const lines = pdf.splitTextToSize(noteContent, pageWidth - margin * 2);
+        const lines = pdf.splitTextToSize(
+          noteContent,
+          pageWidth - margin * 2
+        );
 
-    lines.forEach((line) => {
-      if (y > pageHeight - 15) {
-        pdf.addPage();
-        y = 20;
+        pdf.setFontSize(11);
+
+        lines.forEach((line) => {
+          if (y > pageHeight - 15) {
+            pdf.addPage();
+            y = 20;
+          }
+
+          pdf.text(line, margin, y);
+          y += 7;
+        });
+
+        y += 8;
+      });
+
+      const filename = "voicenotes-export.pdf";
+
+      if (Capacitor.isNativePlatform()) {
+        const base64 = pdf.output("datauristring").split(",")[1];
+
+        await Filesystem.writeFile({
+          path: filename,
+          data: base64,
+          directory: Directory.Cache,
+        });
+
+        const file = await Filesystem.getUri({
+          path: filename,
+          directory: Directory.Cache,
+        });
+
+        await Share.share({
+          title: "Export notes as PDF",
+          files: [file.uri],
+          dialogTitle: "Save or share your PDF",
+        });
+      } else {
+        pdf.save(filename);
       }
-
-      pdf.setFontSize(11);
-      pdf.text(line, margin, y);
-      y += 7;
-    });
-
-    y += 8;
-  });
-
-  pdf.save("smart-notes-export.pdf");
-};
-
-  const fetchNotes = async () => {
-  try {
-    startLoading("Fetching notes...");
-    const data = await getNotes();
-
-    setAllNotes(data);
-    applyFolderFilter(data, selectedFolder);
-  } catch (err) {
-    console.error(err);
-    setError("Failed to fetch notes.");
-  } finally {
-    stopLoading();
-  }
-};
-
-  const filterNotesByFolder = (folder) => {
-  setSelectedFolder(folder);
-  applyFolderFilter(allNotes, folder);
-
-  if (!folder) {
-    setNotes(allNotes);
-    return;
-  }
-
-  const filtered = allNotes.filter(
-    (note) => note.metadata?.folder_id === folder.id
-  );
-
-  setNotes(filtered);
-};
+    } catch (err) {
+      console.error("PDF export failed:", err);
+      alert(`PDF export failed: ${err.message}`);
+    }
+  };
 
   const saveNote = async () => {
     if (!text.trim()) {
@@ -226,7 +294,13 @@ ${text}
 
     try {
       startLoading("Saving note...");
-      await createTextNote(text.trim(), selectedFolder?.id || 0, selectedFolder?.name || "General");
+
+      await createTextNote(
+        text.trim(),
+        selectedFolder?.id || 0,
+        selectedFolder?.name || "General"
+      );
+
       setText("");
       await fetchNotes();
     } catch (err) {
@@ -241,7 +315,11 @@ ${text}
     try {
       startLoading("Deleting note...");
       await deleteNoteById(id);
-       setSelectedNoteIds((prev) => prev.filter((noteId) => noteId !== id));
+
+      setSelectedNoteIds((prev) =>
+        prev.filter((noteId) => noteId !== id)
+      );
+
       await fetchNotes();
     } catch (err) {
       console.error(err);
@@ -252,84 +330,74 @@ ${text}
   };
 
   const selectAllNotes = () => {
-  if (selectedNoteIds.length === notes.length) {
+    if (selectedNoteIds.length === notes.length) {
+      setSelectedNoteIds([]);
+    } else {
+      setSelectedNoteIds(notes.map((note) => note.id));
+    }
+  };
+
+  const clearSelection = () => {
     setSelectedNoteIds([]);
-  } else {
-    setSelectedNoteIds(notes.map((note) => note.id));
-  }
-};
+  };
 
-const clearSelection = () => {  setSelectedNoteIds([]);
-};
+  const sortNotes = (type) => {
+    setSortType(type);
 
-const sortNotes = (type) => {
-  setSortType(type);
+    const sorted = [...notes].sort((a, b) => {
+      const textA = a.metadata?.transcript || "";
+      const textB = b.metadata?.transcript || "";
 
-  const sorted = [...notes].sort((a, b) => {
-    const textA = a.metadata?.transcript || "";
-    const textB = b.metadata?.transcript || "";
+      const dateA = new Date(a.metadata?.created_at || 0);
+      const dateB = new Date(b.metadata?.created_at || 0);
 
-    const dateA = new Date(a.metadata?.created_at || 0);
-    const dateB = new Date(b.metadata?.created_at || 0);
+      if (type === "newest") return dateB - dateA;
+      if (type === "oldest") return dateA - dateB;
+      if (type === "az") return textA.localeCompare(textB);
+      if (type === "za") return textB.localeCompare(textA);
 
-    if (type === "newest") {
-      return dateB - dateA;
+      return 0;
+    });
+
+    setNotes(sorted);
+  };
+
+  const updateNote = async (
+    id,
+    customText = null,
+    folderId = null,
+    folderName = null
+  ) => {
+    const finalText = customText ?? editingText.trim();
+
+    if (!finalText.trim()) {
+      alert("Please type something");
+      return;
     }
 
-    if (type === "oldest") {
-      return dateA - dateB;
+    try {
+      startLoading("Updating note...");
+
+      const currentNote = notes.find((note) => note.id === id);
+
+      await updateNoteById(
+        id,
+        finalText.trim(),
+        folderId ?? currentNote?.metadata?.folder_id ?? 0,
+        folderName ?? currentNote?.metadata?.folder_name ?? "General"
+      );
+
+      setEditingNoteId(null);
+      setEditingText("");
+
+      await fetchNotes();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to update note.");
+    } finally {
+      stopLoading();
     }
-
-    if (type === "az") {
-      return textA.localeCompare(textB);
-    }
-
-    if (type === "za") {
-      return textB.localeCompare(textA);
-    }
-
-    return 0;
-  });
-
-  setNotes(sorted);
-};
-
-const updateNote = async (
-  id,
-  customText = null,
-  folderId = null,
-  folderName = null
-) => {
-  const finalText = customText ?? editingText.trim();
-
-  if (!finalText.trim()) {
-    alert("Please type something");
-    return;
-  }
-
-  try {
-    startLoading("Updating note...");
-
-    const currentNote = notes.find((note) => note.id === id);
-
-    await updateNoteById(
-      id,
-      finalText.trim(),
-      folderId ?? currentNote?.metadata?.folder_id ?? 0,
-      folderName ?? currentNote?.metadata?.folder_name ?? "General"
-    );
-
-    setEditingNoteId(null);
-    setEditingText("");
-
-    await fetchNotes();
-  } catch (err) {
-    console.error(err);
-    setError("Failed to update note.");
-  } finally {
-    stopLoading();
-  }
-};
+  };
 
   const handleSearch = async (query) => {
     try {
@@ -342,9 +410,9 @@ const updateNote = async (
 
       if (query.startsWith("#")) {
         const tag = query.replace("#", "").toLowerCase().trim();
-        const allNotes = await getNotes();
+        const data = await getNotes();
 
-        const filteredNotes = allNotes.filter((note) =>
+        const filteredNotes = data.filter((note) =>
           note.metadata?.tags?.some((t) =>
             t.toLowerCase().includes(tag)
           )
@@ -369,22 +437,10 @@ const updateNote = async (
     await fetchNotes();
   };
 
-
-  const applyFolderFilter = (data, folder) => {
-  if (!folder) {
-    setNotes(data);
-    return;
-  }
-
-  const filtered = data.filter(
-    (note) => Number(note.metadata?.folder_id) === Number(folder.id)
-  );
-
-  setNotes(filtered);
-};
-
   useEffect(() => {
     fetchNotes();
+    // Initial fetch only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
@@ -398,12 +454,12 @@ const updateNote = async (
     setEditingNoteId,
     editingText,
     setEditingText,
+
     selectedtag,
     setSelectedTag,
     filterByTag,
     allNotes,
     filterNotesByFolder,
-
 
     loading,
     loadingMessage,
@@ -415,8 +471,10 @@ const updateNote = async (
     selectedNoteIds,
     toggleSelectNote,
     deleteSelectedNotes,
+
     selectedFolder,
     setSelectedFolder,
+
     sortType,
     sortNotes,
     exportNotesAsTxt,
