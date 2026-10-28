@@ -20,6 +20,7 @@ export const getNotes = async () => {
     headers: getAuthHeaders(),
   });
 
+  window.dispatchEvent(new CustomEvent("voxnote:notes-meta", { detail: { truncated: Boolean(res.data.truncated) } }));
   return res.data.notes || [];
 };
 
@@ -72,6 +73,7 @@ export const semanticSearchNotes = async (query) => {
     }
   );
 
+  window.dispatchEvent(new CustomEvent("voxnote:search-mode", { detail: { mode: res.data.search_mode || "keyword" } }));
   return res.data.results || [];
 };
 

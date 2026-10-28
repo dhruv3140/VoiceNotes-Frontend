@@ -48,7 +48,7 @@ function ServerStatus() {
 
   return (
     <div role="status" aria-live="polite" style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, padding: "10px 14px",
+      position: "relative", width: "100%", boxSizing: "border-box", padding: "10px 14px",
       background: "#1f2937", color: "#fff", fontSize: 14, textAlign: "center",
     }}>
       {state === "waking"
