@@ -2,7 +2,7 @@
 
 28 Oct 2026. Based on VoiceNotes-Frontend main commit 2956401.
 
-This is an implementation, not a production deployment. The original live site is unchanged.
+Production website deployed on 28 Oct 2026 through PR1, merge commit8955c0e56808e07cb3a468f2bb9e36fe1e86fc4c. Public site: https://voice-notes-frontend-lemon.vercel.app/ . Original main2956401 is preserved in Git history for rollback. Android remains a signed debug preview, not an original-release-key update.
 
 ## What changed
 - Shared ink/mint/cream desktop and phone design, self-hosted fonts and consistent controls.
@@ -61,9 +61,14 @@ No physical Android device or emulator was used. Browser screenshots are not nat
 - No server idempotency: a timed-out response may have saved already. Retry requires an explicit duplicate-risk warning.
 - Existing large JS bundle warning and dependency audit findings remain. No broad automatic dependency upgrade was made.
 - PDF letterhead added: repeated VoxNote header/footer, note titles, dates, folder/tags, continuation labels and page numbers. Browser-shaped imagery preserves Hindi; embedded-font text layer supports search/copy. Complex-script selection geometry can differ from visible text. This is not a tagged/accessibility-certified PDF. Very long exports use more memory; native long-export performance still needs device testing.
-- No analytics, streaks, notifications, AI rewrite/chat, paid services, remote push or production release was added.
+- No analytics, streaks, notifications, AI rewrite/chat or paid services were added. Frontend source is pushed and deployed to the existing Vercel production website. Original Android release signing identity remains unchanged.
 
 For fixture QA, run Vite without a production API override (defaults to http://127.0.0.1:8000); the scripts intercept that origin. Run scripts from the source root, e.g. node qa/test-ui.mjs.
 
 ## Letterhead revision - 28 Oct 2026
 Short1-page, long8-page, and mixed Hindi/English exports generated and pixel inspected. Text extraction recovered English and Hindi. Native Filesystem/Share path retained; actual PDF-share device test remains open. Updated APK signed with same debug certificate and preview package as prior test build, not original release.
+
+## Final deployment verification
+Production build tested with intercepted fixture API responses and a fake microphone: login, CRUD, tags, search, recording, delete, TXT, upload recovery, responsive320/390/768/1280 and short-height flows all pass. These are frontend tests, not proof of production transcription or real account authentication. Production login pixels inspected at mobile and desktop; correct API/OAuth public config found in built JavaScript; backend OpenAPI endpoint returned200. No real OTP was sent. Automated axe checks found zero violations in the three tested views, not certification.
+
+Final preview APK SHA256: 062f68169de0b71ecd0e4d6d7b2c67924b66d42b77120fedef69ec06711df7f8. Same preview package and debug certificate as earlier preview. User reported saving works on their phone, but no full native-device QA is claimed.
