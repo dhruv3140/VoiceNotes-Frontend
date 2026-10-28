@@ -1,4 +1,3 @@
-import React from "react";
 
 function NoteCard({
   note,
@@ -19,14 +18,14 @@ function NoteCard({
 
   return (
     <div className="note-card">
-      <div style={{ marginBottom: "10px" }}>
+      <label className="note-selection">
         <input
           type="checkbox"
           checked={isSelected}
           onChange={() => toggleSelectNote(note.id)}
         />
-        <span style={{ marginLeft: "8px" }}>Select</span>
-      </div>
+        <span>Select note</span>
+      </label>
 
       {isEditing ? (
         <>
@@ -64,7 +63,7 @@ function NoteCard({
               : "Old note"}
           </p>
           <p className="note-folder">
-            📁 {note.metadata?.folder_name || "General"}
+            {note.metadata?.folder_name || "General"}
           </p>
 
           <p className="note-date">
@@ -76,13 +75,13 @@ function NoteCard({
 
           <div className="tags">
             {note.metadata?.tags?.map((tag, index) => (
-              <span
+              <button type="button"
                 key={index}
                 className="tag"
                 onClick={() => filterByTag(tag)}
               >
                 #{tag}
-              </span>
+              </button>
             ))}
           </div>
 
@@ -97,13 +96,14 @@ function NoteCard({
               Edit
             </button>
 
-            <button onClick={() => deleteNote(note.id)} disabled={loading}>
+            <button className="delete-note" onClick={() => deleteNote(note.id)} disabled={loading}>
               Delete
             </button>
           </div>
         </>
       )}
       <select
+  aria-label="Move note to folder"
   className="folder-move-select"
   value={note.metadata?.folder_id || 0}
   onChange={(e) => {

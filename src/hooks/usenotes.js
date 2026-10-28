@@ -6,7 +6,7 @@ import {
   updateNoteById,
   semanticSearchNotes,
 } from "../api/notesapi";
-import jspdf from "jspdf";
+import { createNotesPdf } from "../utils/notesPdf";
 import { Capacitor } from "@capacitor/core";
 import {
   Directory,
@@ -27,6 +27,7 @@ function useNotes() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [selectedNoteIds, setSelectedNoteIds] = useState([]);
   const [selectedtag, setSelectedTag] = useState("");
@@ -37,6 +38,7 @@ function useNotes() {
     setLoading(true);
     setLoadingMessage(message);
     setError(null);
+    setSuccessMessage("");
   };
 
   const stopLoading = () => {
@@ -64,6 +66,7 @@ function useNotes() {
       const data = await getNotes();
 
       setAllNotes(data);
+      setSelectedTag("");
       applyFolderFilter(data, selectedFolder);
     } catch (err) {
       console.error(err);
@@ -76,7 +79,7 @@ function useNotes() {
   const filterByTag = (tag) => {
     setSelectedTag(tag);
 
-    const filtered = notes.filter((note) => {
+    const filtered = allNotes.filter((note) => {
       const tags = note.metadata?.tags || [];
       return tags.includes(tag);
     });
@@ -121,6 +124,7 @@ function useNotes() {
   };
 
   const filterNotesByFolder = (folder) => {
+    setSelectedTag("");
     setSelectedFolder(folder);
     applyFolderFilter(allNotes, folder);
   };
@@ -210,51 +214,7 @@ ${transcript}
     }
 
     try {
-      const pdf = new jspdf();
-      const margin = 14;
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-
-      let y = 20;
-
-      pdf.setFontSize(18);
-      pdf.text("VoiceNotes Export", margin, y);
-      y += 15;
-
-      notesToExport.forEach((note, index) => {
-        const transcript = note.metadata?.transcript || "";
-        const tags = note.metadata?.tags?.join(", ") || "No tags";
-        const folder = note.metadata?.folder_name || "General";
-        const createdAt = note.metadata?.created_at
-          ? new Date(note.metadata.created_at).toLocaleString()
-          : "Old note";
-
-        const noteContent = `Note ${index + 1}
-Folder: ${folder}
-Created At: ${createdAt}
-Tags: ${tags}
-
-${transcript}`;
-
-        const lines = pdf.splitTextToSize(
-          noteContent,
-          pageWidth - margin * 2
-        );
-
-        pdf.setFontSize(11);
-
-        lines.forEach((line) => {
-          if (y > pageHeight - 15) {
-            pdf.addPage();
-            y = 20;
-          }
-
-          pdf.text(line, margin, y);
-          y += 7;
-        });
-
-        y += 8;
-      });
+      const pdf = await createNotesPdf(notesToExport);
 
       const filename = "voicenotes-export.pdf";
 
@@ -303,6 +263,7 @@ ${transcript}`;
 
       setText("");
       await fetchNotes();
+      setSuccessMessage("Note saved. You can find it in Saved notes.");
     } catch (err) {
       console.error(err);
       setError("Failed to save note.");
@@ -312,6 +273,7 @@ ${transcript}`;
   };
 
   const deleteNote = async (id) => {
+    if (!window.confirm("Delete this note? This cannot be undone.")) return;
     try {
       startLoading("Deleting note...");
       await deleteNoteById(id);
@@ -438,7 +400,9 @@ ${transcript}`;
   };
 
   useEffect(() => {
-    fetchNotes();
+    // Start the initial network read without synchronously setting state in this effect.
+    const timer = setTimeout(fetchNotes, 0);
+    return () => clearTimeout(timer);
     // Initial fetch only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -463,6 +427,7 @@ ${transcript}`;
 
     loading,
     loadingMessage,
+    successMessage,
     error,
     setError,
     startLoading,

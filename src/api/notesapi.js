@@ -77,7 +77,8 @@ export const semanticSearchNotes = async (query) => {
 
 export const createAudioNote = async (audioBlob) => {
   const formData = new FormData();
-  formData.append("file", audioBlob, "note.webm");
+  const extension = audioBlob.type.includes("mp4") ? "m4a" : audioBlob.type.includes("ogg") ? "ogg" : "webm";
+  formData.append("file", audioBlob, `note.${extension}`);
 
   const res = await axios.post(`${API_URL}/notes/audio`, formData, {
     headers: {

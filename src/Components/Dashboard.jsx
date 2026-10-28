@@ -1,3 +1,4 @@
+import Icon from "./Icon";
 import useNotes from "../hooks/usenotes";
 import useVoiceRecorder from "../hooks/usevoicerecorder";
 
@@ -36,6 +37,7 @@ function Dashboard({ user, handleLogout }) {
 
     loading,
     loadingMessage,
+    successMessage,
     error,
     setError,
     startLoading,
@@ -55,16 +57,21 @@ function Dashboard({ user, handleLogout }) {
     clearSelectedNotes,
   } = notesData;
 
-  const { isRecording, startRecording, stopRecording } = useVoiceRecorder({
+  const { isRecording, startRecording, stopRecording, pendingAudio, isUploading, elapsed, audioStatus, retryAudio, downloadAudio, discardAudio } = useVoiceRecorder({
     fetchNotes,
     startLoading,
     stopLoading,
     setError,
   });
+  const guardedLogout = () => {
+    if ((isRecording || pendingAudio || isUploading) && !window.confirm("You have unsaved audio. Leaving will lose it. Download or finish saving first. Leave anyway?")) return;
+    handleLogout();
+  };
+  const [mobileView, setMobileView] = useState("capture");
   const [folders, setFolders] = useState([]);
   const [sidebarProfileOpen, setSidebarProfileOpen] = useState(false);
   const [headerProfileOpen, setHeaderProfileOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.matchMedia("(max-width: 900px)").matches);
 
   const loadFolders = async () => {
     try {
@@ -76,20 +83,23 @@ function Dashboard({ user, handleLogout }) {
   };
 
   useEffect(() => {
-    loadFolders();
+    let active = true;
+    getFolders().then(data => { if (active) setFolders(data); }).catch(console.error);
+    return () => { active = false; };
   }, []);
 
   return (
     <div className={`app-container ${sidebarCollapsed ? "sidebar-hidden" : ""}`}>
+      {!sidebarCollapsed && <button className="sidebar-scrim" aria-label="Close folders" onClick={() => setSidebarCollapsed(true)} />}
       {/* LEFT SIDEBAR */}
       <aside className={`app-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="sidebar-brand">
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <span className="brand-logo">🎙️</span>
+            <span className="brand-mark"><Icon name="mic" /></span>
             <h2 className="brand-name">VoxNote AI</h2>
           </div>
-          <button className="sidebar-collapse-btn" onClick={() => setSidebarCollapsed(true)} title="Collapse Sidebar">
-            ◀
+          <button className="sidebar-collapse-btn" onClick={() => setSidebarCollapsed(true)} title="Close folders" aria-label="Close folders">
+            <Icon name="close" size={18} />
           </button>
         </div>
 
@@ -104,14 +114,14 @@ function Dashboard({ user, handleLogout }) {
         />
 
         <div className="sidebar-footer">
-          <div className="sidebar-user" onClick={() => setSidebarProfileOpen(!sidebarProfileOpen)}>
+          <button type="button" className="sidebar-user" aria-expanded={sidebarProfileOpen} aria-label="Account menu" onClick={() => setSidebarProfileOpen(!sidebarProfileOpen)}>
             <div className="user-avatar">{user?.name ? user.name[0].toUpperCase() : "U"}</div>
             <div className="user-info">
               <p className="user-name">{user?.name}</p>
               <p className="user-role">Free Plan</p>
             </div>
             <span className="user-menu-dots">⋮</span>
-          </div>
+          </button>
 
           {sidebarProfileOpen && (
             <div className="user-popover sidebar-user-popover">
@@ -136,7 +146,7 @@ function Dashboard({ user, handleLogout }) {
                   </>
                 )}
               </div>
-              <button onClick={handleLogout} className="logout-popover-btn">
+              <button onClick={guardedLogout} className="logout-popover-btn">
                 Logout
               </button>
             </div>
@@ -150,25 +160,25 @@ function Dashboard({ user, handleLogout }) {
         <header className="app-header">
           <div className="header-breadcrumbs">
             {sidebarCollapsed && (
-              <button className="sidebar-expand-btn" onClick={() => setSidebarCollapsed(false)} title="Expand Sidebar">
-                ☰
+              <button className="sidebar-expand-btn" onClick={() => setSidebarCollapsed(false)} title="Open folders" aria-label="Open folders" aria-expanded={!sidebarCollapsed}>
+                <Icon name="menu" />
               </button>
             )}
             <span className="breadcrumb-parent">Notes</span>
             <span className="breadcrumb-sep">/</span>
             <span className="breadcrumb-current">
-              {selectedFolder ? `📁 ${selectedFolder.name}` : selectedtag ? `🏷️ #${selectedtag}` : "All Notes"}
+              {selectedFolder ? selectedFolder.name : selectedtag ? `#${selectedtag}` : "All Notes"}
             </span>
           </div>
 
           <div className="header-actions">
             <div className="header-user-menu-wrapper" style={{ position: "relative" }}>
-              <div className="header-user-menu" onClick={() => setHeaderProfileOpen(!headerProfileOpen)}>
+              <button type="button" className="header-user-menu" aria-expanded={headerProfileOpen} aria-label="Account menu" onClick={() => setHeaderProfileOpen(!headerProfileOpen)}>
                 <span className="header-user-name">{user?.name}</span>
                 <div className="user-avatar header-avatar">
                   {user?.name ? user.name[0].toUpperCase() : "U"}
                 </div>
-              </div>
+              </button>
 
               {headerProfileOpen && (
                 <div className="user-popover header-user-popover">
@@ -185,7 +195,7 @@ function Dashboard({ user, handleLogout }) {
                       </>
                     )}
                   </div>
-                  <button onClick={handleLogout} className="logout-popover-btn">
+                  <button onClick={guardedLogout} className="logout-popover-btn">
                     Logout
                   </button>
                 </div>
@@ -196,20 +206,22 @@ function Dashboard({ user, handleLogout }) {
 
         {/* CONTENT BODY */}
         <div className="app-content">
-          {loading && <p className="loading">⏳ {loadingMessage}</p>}
-          {error && <p className="error">⚠️ {error}</p>}
+          {successMessage && <p className="success-message" role="status">{successMessage}</p>}
+          {loading && <p className="loading" role="status">{loadingMessage}</p>}
+          {error && <p className="error" role="alert">{error}</p>}
 
+          <section className="workspace-intro"><div><p className="eyebrow">YOUR PERSONAL THOUGHT SPACE</p><h1><span className="mobile-greeting">Your thought space</span><span className="desktop-greeting">{selectedFolder?.name || (selectedtag ? `#${selectedtag}` : 'Every thought, in one place.')}</span></h1><p>Make room for your next good idea.</p></div><span className="workspace-label"><span /> VoxNote workspace</span></section>
           {/* STATS GRID */}
           <div className="stats-grid">
             <div className="stat-card">
-              <div className="stat-icon">📝</div>
+              <div className="stat-icon"><Icon name="note" /></div>
               <div>
                 <h3>{notes.length}</h3>
                 <p>Total Notes</p>
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon">🏷️</div>
+              <div className="stat-icon"><Icon name="tag" /></div>
               <div>
                 <h3>
                   {
@@ -223,7 +235,7 @@ function Dashboard({ user, handleLogout }) {
             </div>
 
             <div className="stat-card">
-              <div className="stat-icon">📁</div>
+              <div className="stat-icon"><Icon name="folder" /></div>
               <div>
                 <h3>{folders.length}</h3>
                 <p>Folders</p>
@@ -231,7 +243,8 @@ function Dashboard({ user, handleLogout }) {
             </div>
           </div>
 
-          <div className="dashboard">
+          <nav className="mobile-workspace-tabs" aria-label="Workspace view"><button aria-pressed={mobileView === 'capture'} className={mobileView === 'capture' ? 'active' : ''} onClick={() => setMobileView('capture')}>Capture a thought</button><button aria-pressed={mobileView === 'notes'} className={mobileView === 'notes' ? 'active' : ''} onClick={() => setMobileView('notes')}>Saved notes <span>{notes.length}</span></button></nav>
+          <div className={`dashboard mobile-view-${mobileView}`}>
             {/* LEFT WORKSPACE PANEL */}
             <div className="left-panel">
               <TextNoteForm
@@ -259,14 +272,14 @@ function Dashboard({ user, handleLogout }) {
             </div>
 
             {/* RIGHT WORKSPACE PANEL */}
-            <div className="right-panel">
+            <div className="right-panel"><div className="mobile-search-slot"><SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} clearSearch={clearSearch} fetchNotes={fetchNotes} loading={loading} /></div>
               <div className="right-panel-header">
-                <h2>Saved Notes</h2>
+                <div><p className="eyebrow">YOUR COLLECTION</p><h2>Saved notes <span className="note-total">{notes.length}</span></h2></div>
 
                 <div className="actions-row">
                   <div className="sort-box">
                     <label>Sort: </label>
-                    <select value={sortType} onChange={(e) => sortNotes(e.target.value)}>
+                    <select aria-label="Sort saved notes" value={sortType} onChange={(e) => sortNotes(e.target.value)}>
                       <option value="newest">Newest First</option>
                       <option value="oldest">Oldest First</option>
                       <option value="az">A-Z</option>
@@ -314,13 +327,20 @@ function Dashboard({ user, handleLogout }) {
             </div>
           </div>
         </div>
-      </main>
-
       <VoiceRecorder
         isRecording={isRecording}
         startRecording={startRecording}
         stopRecording={stopRecording}
+        pendingAudio={pendingAudio}
+        isUploading={isUploading}
+        elapsed={elapsed}
+        audioStatus={audioStatus}
+        retryAudio={retryAudio}
+        downloadAudio={downloadAudio}
+        discardAudio={discardAudio}
+        disabled={loading && !isRecording}
       />
+      </main>
     </div>
   );
 }
