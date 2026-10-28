@@ -136,7 +136,7 @@ function Login({
           <h2>Welcome back</h2>
           <p className="auth-subtitle">
             {loginMode === "password"
-              ? "Login to continue to Smart Notes"
+              ? "Login to continue to VoxNote AI Notes"
               : "Login securely using a one-time password"}
           </p>
         </div>

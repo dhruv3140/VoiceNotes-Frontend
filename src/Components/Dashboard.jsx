@@ -86,7 +86,7 @@ function Dashboard({ user, handleLogout }) {
         <div className="sidebar-brand">
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <span className="brand-logo">🎙️</span>
-            <h2 className="brand-name">Smart Notes</h2>
+            <h2 className="brand-name">VoxNote AI</h2>
           </div>
           <button className="sidebar-collapse-btn" onClick={() => setSidebarCollapsed(true)} title="Collapse Sidebar">
             ◀

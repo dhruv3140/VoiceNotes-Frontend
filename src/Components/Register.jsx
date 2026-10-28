@@ -125,7 +125,7 @@ function Register({ switchToLogin, setToken, setUser }) {
 
           <p className="auth-subtitle">
             {registerMode === "email"
-              ? "Create your Smart Notes account"
+              ? "Create your VocNote AI account"
               : "Create an account using your mobile number"}
           </p>
         </div>
