@@ -1255,10 +1255,7 @@ svg {
 .search-card .button-row {
   margin-top:8px}
 .search-caption {
-  display:block;
-  font-size:11px;
-  line-height:1.45;
-  margin:10px 0 0}
+  display:none}
 .right-panel-header {
   align-items:flex-start;
   gap:14px;
@@ -1562,6 +1559,3 @@ svg {
 
 button.sidebar-user{background:transparent;width:100%;text-align:left;border-radius:0;padding-inline:0;border-bottom:0;border-left:0;border-right:0}button.header-user-menu{background:transparent;color:inherit;padding:4px;border-radius:8px}.capture-dock{flex-wrap:wrap;justify-content:center}.audio-status{flex-basis:100%;font-size:11px;color:#3a6242;line-height:1.5;text-align:center;max-width:440px}.has-recovery .audio-status{display:none}
 .login-kicker{display:block;font-size:10px;font-weight:700;letter-spacing:.16em;color:#4f715d;margin-bottom:12px}.auth-header h2{max-width:380px;line-height:1.12;font-size:36px;letter-spacing:-.045em}.auth-header .auth-subtitle{max-width:340px;line-height:1.65;margin-top:14px}@media(max-width:600px){.auth-header h2{font-size:29px;max-width:290px}.auth-story-main h1{font-size:34px}.auth-story{padding-bottom:26px}.auth-header{margin-bottom:25px}.auth-card{padding-top:32px}}
-
-.search-input input:focus,.search-input input:focus-visible{outline:none;box-shadow:none}
-.search-input:focus-within{border-color:#3a8f84;box-shadow:0 0 0 2px rgba(58,143,132,.25)}

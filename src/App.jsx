@@ -6,7 +6,6 @@ import Login from "./Components/Login";
 import Register from "./Components/Register";
 import ForgotPassword from "./Components/ForgotPassword";
 import Dashboard from "./Components/Dashboard";
-import ServerStatus from "./Components/ServerStatus";
 import { logout } from "./api/authApi";
 
 function getSavedUser() {
@@ -25,15 +24,6 @@ function getSavedUser() {
 }
 
 function App() {
-  return (
-    <>
-      <ServerStatus />
-      <AppContent />
-    </>
-  );
-}
-
-function AppContent() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState(getSavedUser());
   const [authMode, setAuthMode] = useState("login");
