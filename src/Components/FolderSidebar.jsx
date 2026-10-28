@@ -1,13 +1,10 @@
+import Icon from "./Icon";
 import { useState } from "react";
-import { createFolder, getFolders, deleteFolder, renameFolder } from "../api/authApi";
+import { createFolder, deleteFolder } from "../api/authApi";
 
 function FolderSidebar({ selectedFolder, setSelectedFolder, folders, loadFolders, fetchNotes, filterNotesByFolder, allNotes }) {
   const [folderName, setFolderName] = useState("");
   const [error, setError] = useState("");
-  const [editingFolderId, setEditingFolderId] = useState(null);
-const [editingFolderName, setEditingFolderName] = useState("");
-
-
   const handleCreateFolder = async () => {
     if (!folderName.trim()) return;
 
@@ -34,26 +31,6 @@ const [editingFolderName, setEditingFolderName] = useState("");
       setError(err.message);
     }
   };
-  const handleRenameFolder = async (id) => {
-  if (!editingFolderName.trim()) return;
-
-  try {
-    await renameFolder(id, editingFolderName);
-
-    if (selectedFolder?.id === id) {
-      setSelectedFolder({
-        ...selectedFolder,
-        name: editingFolderName,
-      });
-    }
-
-    setEditingFolderId(null);
-    setEditingFolderName("");
-    loadFolders();
-  } catch (err) {
-    setError(err.message);
-  }
-};
 
 
   return (
@@ -66,7 +43,7 @@ const [editingFolderName, setEditingFolderName] = useState("");
         className={!selectedFolder ? "folder-item active-folder" : "folder-item"}
         onClick={() => filterNotesByFolder(null)}
         >
-        All Notes
+        <Icon name="note" size={18} /> All notes
       </button>
 
       <div className="folder-create">
@@ -76,7 +53,7 @@ const [editingFolderName, setEditingFolderName] = useState("");
           value={folderName}
           onChange={(e) => setFolderName(e.target.value)}
         />
-        <button onClick={handleCreateFolder}>+</button>
+        <button onClick={handleCreateFolder} aria-label="Create folder"><Icon name="plus" size={18} /></button>
       </div>
       {folders.map((folder) => {
   const count = allNotes.filter(
@@ -96,11 +73,12 @@ const [editingFolderName, setEditingFolderName] = useState("");
         className="folder-name"
         onClick={() => filterNotesByFolder(folder)}
       >
-        📁 {folder.name} <span className="folder-count">{count}</span>
+        <Icon name="folder" size={17} /> {folder.name} <span className="folder-count">{count}</span>
       </button>
 
       <button
         className="folder-delete"
+        aria-label={`Delete folder ${folder.name}`}
         onClick={() => handleDeleteFolder(folder.id)}
       >
         ×

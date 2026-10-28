@@ -17,6 +17,13 @@ android {
         }
     }
     buildTypes {
+        // Side-by-side test app. Never replaces the user's installed build.
+        debug {
+            applicationIdSuffix ".preview"
+            versionNameSuffix "-preview"
+            resValue "string", "app_name", "VoxNote Preview"
+            resValue "string", "title_activity_main", "VoxNote Preview"
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

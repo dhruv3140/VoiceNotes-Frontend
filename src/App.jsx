@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 
+import AuthLayout from "./Components/AuthLayout";
 import Login from "./Components/Login";
 import Register from "./Components/Register";
 import ForgotPassword from "./Components/ForgotPassword";
@@ -37,25 +38,25 @@ function App() {
   if (!token) {
     if (authMode === "register") {
       return (
-        <Register
+        <AuthLayout><Register
           switchToLogin={() => setAuthMode("login")}
           setToken={setToken}
           setUser={setUser}
-        />
+        /></AuthLayout>
       );
     }
 
     if (authMode === "forgot") {
-      return <ForgotPassword switchToLogin={() => setAuthMode("login")} />;
+      return <AuthLayout><ForgotPassword switchToLogin={() => setAuthMode("login")} /></AuthLayout>;
     }
 
     return (
-      <Login
+      <AuthLayout><Login
         setToken={setToken}
         setUser={setUser}
         switchToRegister={() => setAuthMode("register")}
         switchToForgotPassword={() => setAuthMode("forgot")}
-      />
+      /></AuthLayout>
     );
   }
 

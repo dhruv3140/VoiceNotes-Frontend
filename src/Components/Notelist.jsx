@@ -1,4 +1,3 @@
-import React from "react";
 import NoteCard from "./Notecard";
 
 function NotesList({
@@ -14,24 +13,20 @@ function NotesList({
   selectedNoteIds,
   toggleSelectNote,
   deleteSelectedNotes,
-  clearSelection,
   selectAllNotes,
   filterByTag,
 }) {
   if (notes.length === 0) {
-    return <p>No notes found.</p>;
+    return <div className="empty-state"><span className="empty-mark">✦</span><h3>A fresh page for your thoughts.</h3><p>Write a note or record your first idea.<br />Your saved notes will live here.</p></div>;
   }
 
   return (
-    <div className="notes-list">
+    <div className="notes-list"><div className="selection-toolbar">
       {selectedNoteIds.length > 0 && (
         <button
           onClick={deleteSelectedNotes}
           disabled={loading}
-          style={{
-            marginBottom: "12px",
-            background: "crimson",
-          }}
+          className="danger-button"
         >
           Delete Selected ({selectedNoteIds.length})
         </button>
@@ -39,15 +34,12 @@ function NotesList({
       <button
         onClick={selectAllNotes}
         disabled={loading || notes.length === 0}
-        style={{
-          marginBottom: "12px",
-          marginLeft: "8px",
-        }}
+        className="text-button"
       >
         {selectedNoteIds.length === notes.length ? "Deselect All" : "Select All"}
       </button>
 
-      {notes.map((note) => (
+      </div>{notes.map((note) => (
         <NoteCard
           key={note.id}
           note={note}

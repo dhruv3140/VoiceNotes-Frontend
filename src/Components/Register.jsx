@@ -1,3 +1,4 @@
+import Icon from "./Icon";
 import { useState } from "react";
 import {
   registerUser,
@@ -125,19 +126,19 @@ function Register({ switchToLogin, setToken, setUser }) {
 
           <p className="auth-subtitle">
             {registerMode === "email"
-              ? "Create your VocNote AI account"
+              ? "Create your VoxNote AI account"
               : "Create an account using your mobile number"}
           </p>
         </div>
 
-        {error && <p className="auth-error">{error}</p>}
-        {message && <p className="auth-success">{message}</p>}
+        {error && <p className="auth-error" role="alert">{error}</p>}
+        {message && <p className="auth-success" role="status">{message}</p>}
 
         {!otpSent ? (
           <form onSubmit={handleSendOtp}>
             <input
               type="text"
-              placeholder="Enter your name"
+              aria-label="Enter your name" placeholder="Enter your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={loading}
@@ -148,7 +149,7 @@ function Register({ switchToLogin, setToken, setUser }) {
               <>
                 <input
                   type="email"
-                  placeholder="Enter your email"
+                  aria-label="Enter your email" placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -158,7 +159,7 @@ function Register({ switchToLogin, setToken, setUser }) {
                 <div className="password-input-wrapper">
                   <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Create password"
+                    aria-label="Create password" placeholder="Create password"
                     value={password}
                     minLength={6}
                     maxLength={72}
@@ -175,14 +176,14 @@ function Register({ switchToLogin, setToken, setUser }) {
                       showPassword ? "Hide password" : "Show password"
                     }
                   >
-                    {showPassword ? "🙈" : "👁️"}
+                    <Icon name="eye" size={18} />
                   </button>
                 </div>
               </>
             ) : (
               <input
                 type="tel"
-                placeholder="Enter mobile number"
+                aria-label="Enter mobile number" placeholder="Enter mobile number"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
                 disabled={loading}

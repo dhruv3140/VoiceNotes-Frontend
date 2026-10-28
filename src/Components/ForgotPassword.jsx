@@ -83,7 +83,7 @@ function ForgotPassword({ switchToLogin }) {
 
         <input
           type="email"
-          placeholder="Enter registered email"
+          aria-label="Enter registered email" placeholder="Enter registered email"
           value={email}
           disabled={otpSent}
           onChange={(e) => setEmail(e.target.value)}
@@ -93,7 +93,7 @@ function ForgotPassword({ switchToLogin }) {
           <>
             <input
               type="text"
-              placeholder="Enter 6 digit OTP"
+              aria-label="Enter 6 digit OTP" placeholder="Enter 6 digit OTP"
               value={otp}
               maxLength="6"
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
@@ -101,7 +101,7 @@ function ForgotPassword({ switchToLogin }) {
             <div className="password-input-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter new password"
+                aria-label="Enter new password" placeholder="Enter new password"
                 value={newPassword}
                 minLength={6}
                 maxLength={72}

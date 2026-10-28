@@ -1,3 +1,4 @@
+import Icon from "./Icon";
 import { useState } from "react";
 import {
   loginWithPassword,
@@ -133,23 +134,24 @@ function Login({
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-header">
-          <h2>Welcome back</h2>
+          <span className="login-kicker">YOUR PERSONAL NOTEBOOK</span>
+          <h2>Make room for your ideas.</h2>
           <p className="auth-subtitle">
             {loginMode === "password"
-              ? "Login to continue to VoxNote AI Notes"
+              ? "Sign in to capture a thought, or pick up where you left off."
               : "Login securely using a one-time password"}
           </p>
         </div>
 
-        {error && <p className="auth-error">{error}</p>}
-        {message && <p className="auth-success">{message}</p>}
+        {error && <p className="auth-error" role="alert">{error}</p>}
+        {message && <p className="auth-success" role="status">{message}</p>}
 
         {loginMode === "password" ? (
           <>
             <form onSubmit={handlePasswordLogin}>
               <input
                 type="email"
-                placeholder="Enter your email"
+                aria-label="Enter your email" placeholder="Enter your email"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 disabled={loading}
@@ -159,7 +161,7 @@ function Login({
               <div className="password-input-wrapper">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  aria-label="Enter your password" placeholder="Enter your password"
                   value={password}
                   minLength={6}
                   maxLength={72}
@@ -174,7 +176,7 @@ function Login({
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  <Icon name="eye" size={18} />
                 </button>
               </div>
 
@@ -207,7 +209,7 @@ function Login({
               <form onSubmit={handleSendOtp}>
                 <input
                   type="text"
-                  placeholder="Enter email or mobile number"
+                  aria-label="Enter email or mobile number" placeholder="Enter email or mobile number"
                   value={otpIdentifier}
                   onChange={(e) => setOtpIdentifier(e.target.value)}
                   disabled={loading}
@@ -222,7 +224,7 @@ function Login({
               <form onSubmit={handleVerifyOtp}>
                 <input
                   type="text"
-                  placeholder="Enter OTP"
+                  aria-label="Enter OTP" placeholder="Enter OTP"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   disabled={loading}
