@@ -1,16 +1,35 @@
-# React + Vite
+# VoxNote AI - Voice Notes Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React frontend for VoxNote AI, a voice-notes application with Hindi and English transcription. Record or upload audio, save notes into folders, search them, and export saved notes to PDF.
 
-Currently, two official plugins are available:
+**Live site:** https://voice-notes-frontend-lemon.vercel.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Voice recording and audio upload with save-failure recovery (failed audio stays in memory with Retry / Download / Discard)
+- Notes dashboard with folders, tag filtering and search
+- PDF export of saved notes (jsPDF)
+- Google sign-in
+- Hindi (Devanagari) UI font support with self-hosted fonts
+- Android app via Capacitor (signed debug preview builds; web is the production release)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech stack
 
-## Expanding the ESLint configuration
+- React 19 + Vite, JavaScript
+- Capacitor 8 (Android)
+- axios for the API, jsPDF for PDF export
+- Google sign-in: @react-oauth/google, @capgo/capacitor-social-login
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Run locally
+
+Requires Node 22.12+ (compatible with the current Vite version) and the backend API (see VoiceNotes-Backend).
+
+```bash
+npm ci
+# set VITE_API_URL to the backend URL (defaults to http://127.0.0.1:8000)
+npm run dev
+npm run lint
+npm run build
+```
+
+See UI-HANDOFF.md for the production deployment notes and Android preview details.
